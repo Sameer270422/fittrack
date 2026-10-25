@@ -1,9 +1,15 @@
 const SUPABASE_URL = "https://psnhmrlqjklkgoxbxfny.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_7GPAp7RD2_srLBniXAqBBQ_9cQlVOnn";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 
 const KEY = "fittrack_v4_cache";
+
 const today = () => new Date().toISOString().slice(0, 10);
+
 const blankState = () => ({
   daily: {},
   foods: {},
@@ -15,25 +21,83 @@ const blankState = () => ({
   week: 0
 });
 
-let state = JSON.parse(localStorage.getItem(KEY) || "null") || blankState();
+let state =
+  JSON.parse(localStorage.getItem(KEY) || "null") ||
+  blankState();
+
 let currentUser = null;
 let cloudReady = false;
 
 const foods = {
-  Eggs: { cal: 72, protein: 6.3 },
-  EggWhites: { cal: 52, protein: 11 },
-  WholeWheatBread: { cal: 80, protein: 4 },
-  Paneer: { cal: 265, protein: 18 },
-  SoyaChunks: { cal: 345, protein: 52 },
-  Rice: { cal: 130, protein: 2.7 },
-  Tortilla: { cal: 130, protein: 4 },
-  Whey: { cal: 120, protein: 24 },
-  Milk: { cal: 120, protein: 8 },
-  GreekYogurt: { cal: 100, protein: 10 },
-  Banana: { cal: 105, protein: 1.3 },
-  Orange: { cal: 62, protein: 1.2 },
-  BabyCarrots: { cal: 35, protein: 0.8 },
-  Mayo: { cal: 90, protein: 0 }
+  Eggs: {
+    cal: 72,
+    protein: 6.3
+  },
+
+  EggWhites: {
+    cal: 52,
+    protein: 11
+  },
+
+  WholeWheatBread: {
+    cal: 80,
+    protein: 4
+  },
+
+  Paneer: {
+    cal: 265,
+    protein: 18
+  },
+
+  SoyaChunks: {
+    cal: 345,
+    protein: 52
+  },
+
+  Rice: {
+    cal: 130,
+    protein: 2.7
+  },
+
+  Tortilla: {
+    cal: 130,
+    protein: 4
+  },
+
+  Whey: {
+    cal: 120,
+    protein: 24
+  },
+
+  Milk: {
+    cal: 120,
+    protein: 8
+  },
+
+  GreekYogurt: {
+    cal: 100,
+    protein: 10
+  },
+
+  Banana: {
+    cal: 105,
+    protein: 1.3
+  },
+
+  Orange: {
+    cal: 62,
+    protein: 1.2
+  },
+
+  BabyCarrots: {
+    cal: 35,
+    protein: 0.8
+  },
+
+  Mayo: {
+    cal: 90,
+    protein: 0
+  }
 };
 
 const foodLabels = {
@@ -60,26 +124,32 @@ function el(id) {
 function esc(s) {
   return String(s ?? "").replace(
     /[&<>"']/g,
-    m => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[m])
+    m =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[m])
   );
 }
 
 function avg(a) {
-  return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  return a.length
+    ? a.reduce((x, y) => x + y, 0) / a.length
+    : null;
 }
 
 function entries() {
-  return Object.entries(state.daily).sort((a, b) => b[0].localeCompare(a[0]));
+  return Object.entries(state.daily).sort(
+    (a, b) => b[0].localeCompare(a[0])
+  );
 }
 
 function setSync(text, type = "normal") {
   const x = el("syncStatus");
+
   if (!x) return;
 
   x.textContent = text;
@@ -87,36 +157,78 @@ function setSync(text, type = "normal") {
 }
 
 function cache() {
-  localStorage.setItem(KEY, JSON.stringify(state));
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(state)
+  );
 }
 
 function showTab(name) {
-  document.querySelectorAll(".tab").forEach(b =>
-    b.classList.toggle("active", b.dataset.tab === name)
-  );
+  document
+    .querySelectorAll(".tab")
+    .forEach(b =>
+      b.classList.toggle(
+        "active",
+        b.dataset.tab === name
+      )
+    );
 
-  document.querySelectorAll(".tab-panel").forEach(p =>
-    p.classList.toggle("active", p.id === name)
-  );
+  document
+    .querySelectorAll(".tab-panel")
+    .forEach(p =>
+      p.classList.toggle(
+        "active",
+        p.id === name
+      )
+    );
 }
 
 function setToday() {
   ["dailyDate", "workoutDate"].forEach(id => {
-    el(id).value = today();
+    if (el(id)) {
+      el(id).value = today();
+    }
   });
 }
 
 function normalizeDaily(row) {
   return {
     id: row.id,
-    weight: row.weight == null ? null : Number(row.weight),
-    calories: row.calories == null ? null : Number(row.calories),
-    protein: row.protein == null ? null : Number(row.protein),
-    water: row.water == null ? null : Number(row.water),
-    sleep: row.sleep == null ? null : Number(row.sleep),
-    steps: row.steps == null ? null : Number(row.steps),
+
+    weight:
+      row.weight == null
+        ? null
+        : Number(row.weight),
+
+    calories:
+      row.calories == null
+        ? null
+        : Number(row.calories),
+
+    protein:
+      row.protein == null
+        ? null
+        : Number(row.protein),
+
+    water:
+      row.water == null
+        ? null
+        : Number(row.water),
+
+    sleep:
+      row.sleep == null
+        ? null
+        : Number(row.sleep),
+
+    steps:
+      row.steps == null
+        ? null
+        : Number(row.steps),
+
     strength: !!row.strength,
+
     badminton: !!row.badminton,
+
     notes: row.notes || ""
   };
 }
@@ -137,13 +249,32 @@ function normalizeWorkout(row) {
     date: row.workout_date,
     split: row.split,
     exercise: row.exercise || "",
-    weight: row.weight == null ? null : Number(row.weight),
-    sets: row.sets == null ? null : Number(row.sets),
-    reps: row.reps == null ? null : Number(row.reps),
+
+    weight:
+      row.weight == null
+        ? null
+        : Number(row.weight),
+
+    sets:
+      row.sets == null
+        ? null
+        : Number(row.sets),
+
+    reps:
+      row.reps == null
+        ? null
+        : Number(row.reps),
+
     badminton: !!row.badminton,
+
     completed: !!row.completed
   };
 }
+
+
+/* =========================================================
+   CLOUD LOADING
+   ========================================================= */
 
 async function loadCloud() {
   if (!currentUser) return;
@@ -153,41 +284,53 @@ async function loadCloud() {
   const uid = currentUser.id;
 
   const [p, d, f, w] = await Promise.all([
-    supabase
+    supabaseClient
       .from("profiles")
       .select("id,start_weight,goal_weight")
       .eq("id", uid)
       .maybeSingle(),
 
-    supabase
+    supabaseClient
       .from("daily_logs")
       .select("*")
       .eq("user_id", uid)
-      .order("log_date", { ascending: false }),
+      .order("log_date", {
+        ascending: false
+      }),
 
-    supabase
+    supabaseClient
       .from("food_logs")
       .select("*")
       .eq("user_id", uid)
-      .order("log_date", { ascending: false }),
+      .order("log_date", {
+        ascending: false
+      }),
 
-    supabase
+    supabaseClient
       .from("workout_logs")
       .select("*")
       .eq("user_id", uid)
-      .order("workout_date", { ascending: false })
+      .order("workout_date", {
+        ascending: false
+      })
   ]);
 
-  const errors = [p, d, f, w].filter(x => x.error);
+  const errors = [p, d, f, w].filter(
+    x => x.error
+  );
 
   if (errors.length) {
     console.error(errors);
+
     setSync(
       "Cloud connection error — using local cache",
       "error"
     );
+
     cloudReady = false;
+
     renderAll();
+
     return;
   }
 
@@ -217,58 +360,100 @@ async function loadCloud() {
 
   if (p.data) {
     state.profile = {
-      startWeight: Number(p.data.start_weight) || 88,
-      goalWeight: Number(p.data.goal_weight) || 83
+      startWeight:
+        Number(p.data.start_weight) || 88,
+
+      goalWeight:
+        Number(p.data.goal_weight) || 83
     };
   }
 
   state.daily = {};
+
   (d.data || []).forEach(r => {
-    state.daily[r.log_date] = normalizeDaily(r);
+    state.daily[r.log_date] =
+      normalizeDaily(r);
   });
 
   state.foods = {};
+
   (f.data || []).forEach(r => {
-    (state.foods[r.log_date] ??= []).push(normalizeFood(r));
+    (state.foods[r.log_date] ??= []).push(
+      normalizeFood(r)
+    );
   });
 
-  state.workouts = (w.data || []).map(normalizeWorkout);
+  state.workouts =
+    (w.data || []).map(
+      normalizeWorkout
+    );
 
   cache();
 
   cloudReady = true;
 
-  setSync("Synced to cloud", "good");
+  setSync(
+    "Synced to cloud",
+    "good"
+  );
 
   renderAll();
 }
 
+
+/* =========================================================
+   MIGRATE LOCAL DATA
+   ========================================================= */
+
 async function migrateLocalToCloud() {
   try {
-    await supabase
+    await supabaseClient
       .from("profiles")
       .upsert(
         {
           id: currentUser.id,
-          start_weight: state.profile.startWeight,
-          goal_weight: state.profile.goalWeight
+          start_weight:
+            state.profile.startWeight,
+          goal_weight:
+            state.profile.goalWeight
         },
-        { onConflict: "id" }
+        {
+          onConflict: "id"
+        }
       )
       .throwOnError();
 
-    for (const [date, x] of Object.entries(state.daily)) {
-      await upsertDaily(date, x, true);
+    for (
+      const [date, x] of Object.entries(
+        state.daily
+      )
+    ) {
+      await upsertDaily(
+        date,
+        x,
+        true
+      );
     }
 
-    for (const [date, list] of Object.entries(state.foods)) {
+    for (
+      const [date, list] of Object.entries(
+        state.foods
+      )
+    ) {
       for (const x of list) {
-        await insertFood(date, x, true);
+        await insertFood(
+          date,
+          x,
+          true
+        );
       }
     }
 
     for (const x of state.workouts) {
-      await insertWorkout(x, true);
+      await insertWorkout(
+        x,
+        true
+      );
     }
 
     cloudReady = true;
@@ -282,6 +467,7 @@ async function migrateLocalToCloud() {
 
   } catch (err) {
     console.error(err);
+
     setSync(
       "Upload failed — local data kept",
       "error"
@@ -289,24 +475,50 @@ async function migrateLocalToCloud() {
   }
 }
 
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
 async function upsertProfile() {
-  if (!cloudReady || !currentUser) return;
+  if (
+    !cloudReady ||
+    !currentUser
+  ) {
+    return;
+  }
 
-  const { error } = await supabase
-    .from("profiles")
-    .upsert(
-      {
-        id: currentUser.id,
-        start_weight: state.profile.startWeight,
-        goal_weight: state.profile.goalWeight
-      },
-      { onConflict: "id" }
-    );
+  const { error } =
+    await supabaseClient
+      .from("profiles")
+      .upsert(
+        {
+          id: currentUser.id,
+          start_weight:
+            state.profile.startWeight,
+          goal_weight:
+            state.profile.goalWeight
+        },
+        {
+          onConflict: "id"
+        }
+      );
 
-  if (error) console.error(error);
+  if (error) {
+    console.error(error);
+  }
 }
 
-async function upsertDaily(date, x, silent = false) {
+
+/* =========================================================
+   DAILY LOG
+   ========================================================= */
+
+async function upsertDaily(
+  date,
+  x,
+  silent = false
+) {
   if (!currentUser) return;
 
   const payload = {
@@ -323,14 +535,18 @@ async function upsertDaily(date, x, silent = false) {
     notes: x.notes
   };
 
-  const { data, error } = await supabase
-    .from("daily_logs")
-    .upsert(
-      payload,
-      { onConflict: "user_id,log_date" }
-    )
-    .select()
-    .single();
+  const { data, error } =
+    await supabaseClient
+      .from("daily_logs")
+      .upsert(
+        payload,
+        {
+          onConflict:
+            "user_id,log_date"
+        }
+      )
+      .select()
+      .single();
 
   if (error) {
     console.error(error);
@@ -345,17 +561,31 @@ async function upsertDaily(date, x, silent = false) {
     return;
   }
 
-  state.daily[date] = normalizeDaily(data);
+  state.daily[date] =
+    normalizeDaily(data);
 
   cache();
 
   if (!silent) {
-    setSync("Saved to cloud", "good");
+    setSync(
+      "Saved to cloud",
+      "good"
+    );
+
     renderAll();
   }
 }
 
-async function insertFood(date, x, silent = false) {
+
+/* =========================================================
+   FOOD
+   ========================================================= */
+
+async function insertFood(
+  date,
+  x,
+  silent = false
+) {
   if (!currentUser) return;
 
   const payload = {
@@ -367,11 +597,12 @@ async function insertFood(date, x, silent = false) {
     protein: x.protein
   };
 
-  const { data, error } = await supabase
-    .from("food_logs")
-    .insert(payload)
-    .select()
-    .single();
+  const { data, error } =
+    await supabaseClient
+      .from("food_logs")
+      .insert(payload)
+      .select()
+      .single();
 
   if (error) {
     console.error(error);
@@ -395,12 +626,24 @@ async function insertFood(date, x, silent = false) {
   cache();
 
   if (!silent) {
-    setSync("Food saved to cloud", "good");
+    setSync(
+      "Food saved to cloud",
+      "good"
+    );
+
     renderAll();
   }
 }
 
-async function insertWorkout(x, silent = false) {
+
+/* =========================================================
+   WORKOUT
+   ========================================================= */
+
+async function insertWorkout(
+  x,
+  silent = false
+) {
   if (!currentUser) return;
 
   const payload = {
@@ -415,11 +658,12 @@ async function insertWorkout(x, silent = false) {
     completed: x.completed
   };
 
-  const { data, error } = await supabase
-    .from("workout_logs")
-    .insert(payload)
-    .select()
-    .single();
+  const { data, error } =
+    await supabaseClient
+      .from("workout_logs")
+      .insert(payload)
+      .select()
+      .single();
 
   if (error) {
     console.error(error);
@@ -441,54 +685,77 @@ async function insertWorkout(x, silent = false) {
   cache();
 
   if (!silent) {
-    setSync("Workout saved to cloud", "good");
+    setSync(
+      "Workout saved to cloud",
+      "good"
+    );
+
     renderAll();
   }
 }
 
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
 function renderDashboard() {
   const e = entries();
 
-  const weights = e
-    .map(x => Number(x[1].weight))
-    .filter(Boolean);
+  const weights =
+    e
+      .map(x => Number(x[1].weight))
+      .filter(Boolean);
 
-  const cals = e
-    .map(x => Number(x[1].calories))
-    .filter(Boolean);
+  const cals =
+    e
+      .map(x => Number(x[1].calories))
+      .filter(Boolean);
 
-  const prots = e
-    .map(x => Number(x[1].protein))
-    .filter(Boolean);
+  const prots =
+    e
+      .map(x => Number(x[1].protein))
+      .filter(Boolean);
 
   const current =
-    weights[0] ?? state.profile.startWeight;
+    weights[0] ??
+    state.profile.startWeight;
 
   el("statWeight").textContent =
-    current.toFixed(1) + " kg";
+    current.toFixed(1) +
+    " kg";
 
   el("statLost").textContent =
     Math.max(
       0,
-      state.profile.startWeight - current
-    ).toFixed(1) + " kg";
+      state.profile.startWeight -
+        current
+    ).toFixed(1) +
+    " kg";
 
   el("statCal").textContent =
-    avg(cals)?.toFixed(0) ?? "—";
+    avg(cals)?.toFixed(0) ??
+    "—";
 
   el("statProtein").textContent =
     avg(prots) !== null
-      ? avg(prots).toFixed(0) + " g"
+      ? avg(prots).toFixed(0) +
+        " g"
       : "—";
 
   el("statStrength").textContent =
-    e.filter(x => x[1].strength).length;
+    e.filter(
+      x => x[1].strength
+    ).length;
 
   el("statBadminton").textContent =
-    e.filter(x => x[1].badminton).length;
+    e.filter(
+      x => x[1].badminton
+    ).length;
 
   el("daysLogged").textContent =
-    e.length + " days logged";
+    e.length +
+    " days logged";
 
   const range =
     state.profile.startWeight -
@@ -501,20 +768,29 @@ function renderDashboard() {
           Math.min(
             100,
             (
-              (state.profile.startWeight - current) /
+              (
+                state.profile.startWeight -
+                current
+              ) /
               range
-            ) * 100
+            ) *
+              100
           )
         )
       : 0;
 
-  el("goalBar").style.width = pct + "%";
+  el("goalBar").style.width =
+    pct + "%";
 
   drawChart(
-    weights.slice(0, 30).reverse()
+    weights
+      .slice(0, 30)
+      .reverse()
   );
 
-  el("dashboardWeekly").innerHTML =
+  el(
+    "dashboardWeekly"
+  ).innerHTML =
     e
       .slice(0, 7)
       .map(
@@ -523,7 +799,8 @@ function renderDashboard() {
             <span>${x[0]}</span>
             <strong>${
               x[1].weight
-                ? x[1].weight + " kg"
+                ? x[1].weight +
+                  " kg"
                 : "—"
             }</strong>
           </div>`
@@ -532,24 +809,44 @@ function renderDashboard() {
     '<p class="muted">No daily logs yet.</p>';
 }
 
+
+/* =========================================================
+   CHART
+   ========================================================= */
+
 function drawChart(weights) {
-  const c = el("weightChart");
+  const c =
+    el("weightChart");
 
-  const ctx = c.getContext("2d");
+  const ctx =
+    c.getContext("2d");
 
-  const w = c.width = c.clientWidth * 2;
-  const h = c.height = 230 * 2;
+  const w =
+    (c.width =
+      c.clientWidth * 2);
+
+  const h =
+    (c.height =
+      230 * 2);
 
   ctx.scale(2, 2);
 
   const W = w / 2;
   const H = h / 2;
 
-  ctx.clearRect(0, 0, W, H);
+  ctx.clearRect(
+    0,
+    0,
+    W,
+    H
+  );
 
   if (weights.length < 2) {
-    ctx.fillStyle = "#718096";
-    ctx.font = "14px system-ui";
+    ctx.fillStyle =
+      "#718096";
+
+    ctx.font =
+      "14px system-ui";
 
     ctx.fillText(
       "Log at least two weights to see your trend.",
@@ -561,54 +858,93 @@ function drawChart(weights) {
   }
 
   const min =
-    Math.min(...weights) - 1;
+    Math.min(...weights) -
+    1;
 
   const max =
-    Math.max(...weights) + 1;
+    Math.max(...weights) +
+    1;
 
-  ctx.strokeStyle = "#cbd5e1";
+  ctx.strokeStyle =
+    "#cbd5e1";
+
   ctx.beginPath();
 
-  ctx.moveTo(35, 15);
-  ctx.lineTo(35, H - 25);
-  ctx.lineTo(W - 15, H - 25);
+  ctx.moveTo(
+    35,
+    15
+  );
+
+  ctx.lineTo(
+    35,
+    H - 25
+  );
+
+  ctx.lineTo(
+    W - 15,
+    H - 25
+  );
 
   ctx.stroke();
 
-  ctx.strokeStyle = "#111827";
+  ctx.strokeStyle =
+    "#111827";
+
   ctx.lineWidth = 3;
 
   ctx.beginPath();
 
-  weights.forEach((v, i) => {
-    const x =
-      35 +
-      i *
-        ((W - 55) /
-          (weights.length - 1));
+  weights.forEach(
+    (v, i) => {
+      const x =
+        35 +
+        i *
+          (
+            (W - 55) /
+            (weights.length - 1)
+          );
 
-    const y =
-      15 +
-      ((max - v) *
-        (H - 40)) /
-        (max - min);
+      const y =
+        15 +
+        (
+          (max - v) *
+          (H - 40)
+        ) /
+          (max - min);
 
-    if (i) {
-      ctx.lineTo(x, y);
-    } else {
-      ctx.moveTo(x, y);
+      if (i) {
+        ctx.lineTo(
+          x,
+          y
+        );
+      } else {
+        ctx.moveTo(
+          x,
+          y
+        );
+      }
     }
-  });
+  );
 
   ctx.stroke();
 }
 
+
+/* =========================================================
+   DAILY RENDER
+   ========================================================= */
+
 function renderDaily() {
-  const rows = entries().slice(0, 14);
+  const rows =
+    entries().slice(
+      0,
+      14
+    );
 
   el("dailyTable").innerHTML =
     rows.length
-      ? `<table class="data-table">
+      ? `
+        <table class="data-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -619,6 +955,7 @@ function renderDaily() {
               <th>Training</th>
             </tr>
           </thead>
+
           <tbody>
             ${rows
               .map(
@@ -639,45 +976,71 @@ function renderDaily() {
                           : ""
                       ]
                         .filter(Boolean)
-                        .join(" + ") || "—"
+                        .join(
+                          " + "
+                        ) ||
+                      "—"
                     }</td>
                   </tr>`
               )
               .join("")}
           </tbody>
-        </table>`
+        </table>
+      `
       : '<p class="muted">No daily logs yet.</p>';
 }
 
-function foodTotals(date = today()) {
-  const list = state.foods[date] || [];
+
+/* =========================================================
+   NUTRITION
+   ========================================================= */
+
+function foodTotals(
+  date = today()
+) {
+  const list =
+    state.foods[date] ||
+    [];
 
   return {
-    cal: list.reduce(
-      (s, x) => s + x.cal * x.qty,
-      0
-    ),
+    cal:
+      list.reduce(
+        (s, x) =>
+          s +
+          x.cal *
+            x.qty,
+        0
+      ),
 
-    protein: list.reduce(
-      (s, x) => s + x.protein * x.qty,
-      0
-    )
+    protein:
+      list.reduce(
+        (s, x) =>
+          s +
+          x.protein *
+            x.qty,
+        0
+      )
   };
 }
 
 function renderNutrition() {
-  const date = today();
+  const date =
+    today();
 
   const list =
-    state.foods[date] || [];
+    state.foods[date] ||
+    [];
 
-  const t = foodTotals(date);
+  const t =
+    foodTotals(date);
 
   el("foodCal").textContent =
     Math.round(t.cal);
 
   el("foodProtein").textContent =
-    Math.round(t.protein);
+    Math.round(
+      t.protein
+    );
 
   el("foodList").innerHTML =
     list.length
@@ -686,19 +1049,32 @@ function renderNutrition() {
             (x, i) =>
               `<div class="food-row">
                 <span>
-                  ${foodLabels[x.food] || esc(x.food)}
+                  ${
+                    foodLabels[
+                      x.food
+                    ] ||
+                    esc(x.food)
+                  }
                   × ${x.qty}
                 </span>
 
                 <span>
-                  ${Math.round(x.cal * x.qty)}
+                  ${Math.round(
+                    x.cal *
+                      x.qty
+                  )}
                   kcal •
-                  ${Math.round(x.protein * x.qty)}g
+                  ${Math.round(
+                    x.protein *
+                      x.qty
+                  )}g
 
                   <button
                     class="danger"
                     onclick="removeFood(${i})"
-                  >×</button>
+                  >
+                    ×
+                  </button>
                 </span>
               </div>`
           )
@@ -728,25 +1104,35 @@ function renderFoodOptions() {
             class="food-card"
             onclick="quickFood('${k}')"
           >
-            <strong>${foodLabels[k]}</strong>
+            <strong>
+              ${foodLabels[k]}
+            </strong>
+
             <br>
+
             <small>
-              ${foods[k].cal} kcal •
-              ${foods[k].protein}g protein
+              ${foods[k].cal}
+              kcal •
+              ${foods[k].protein}
+              g protein
             </small>
           </div>`
       )
       .join("");
 }
 
-async function addFood(food, qty) {
+async function addFood(
+  food,
+  qty
+) {
   await insertFood(
     today(),
     {
       food,
       qty: Number(qty),
       cal: foods[food].cal,
-      protein: foods[food].protein
+      protein:
+        foods[food].protein
     }
   );
 }
@@ -757,7 +1143,10 @@ function quickFood(k) {
 
 async function removeFood(i) {
   const item =
-    (state.foods[today()] || [])[i];
+    (
+      state.foods[today()] ||
+      []
+    )[i];
 
   if (!item) return;
 
@@ -767,11 +1156,17 @@ async function removeFood(i) {
     item.id
   ) {
     const { error } =
-      await supabase
+      await supabaseClient
         .from("food_logs")
         .delete()
-        .eq("id", item.id)
-        .eq("user_id", currentUser.id);
+        .eq(
+          "id",
+          item.id
+        )
+        .eq(
+          "user_id",
+          currentUser.id
+        );
 
     if (error) {
       setSync(
@@ -783,7 +1178,12 @@ async function removeFood(i) {
     }
   }
 
-  state.foods[today()].splice(i, 1);
+  state.foods[
+    today()
+  ].splice(
+    i,
+    1
+  );
 
   cache();
 
@@ -795,16 +1195,25 @@ async function removeFood(i) {
   renderAll();
 }
 
+
+/* =========================================================
+   WORKOUT RENDER
+   ========================================================= */
+
 function renderWorkout() {
   const rows =
     state.workouts
       .slice()
       .reverse()
-      .slice(0, 20);
+      .slice(
+        0,
+        20
+      );
 
   el("workoutTable").innerHTML =
     rows.length
-      ? `<table class="data-table">
+      ? `
+        <table class="data-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -825,22 +1234,40 @@ function renderWorkout() {
                   `<tr>
                     <td>${x.date}</td>
                     <td>${esc(x.split)}</td>
-                    <td>${esc(x.exercise || "—")}</td>
+                    <td>${esc(
+                      x.exercise ||
+                      "—"
+                    )}</td>
                     <td>${x.weight ?? "—"}</td>
                     <td>${x.sets ?? "—"}</td>
                     <td>${x.reps ?? "—"}</td>
-                    <td>${x.badminton ? "Yes" : "No"}</td>
-                    <td>${x.completed ? "Completed" : "—"}</td>
+                    <td>${
+                      x.badminton
+                        ? "Yes"
+                        : "No"
+                    }</td>
+                    <td>${
+                      x.completed
+                        ? "Completed"
+                        : "—"
+                    }</td>
                   </tr>`
               )
               .join("")}
           </tbody>
-        </table>`
+        </table>
+      `
       : '<p class="muted">No workouts yet.</p>';
 }
 
+
+/* =========================================================
+   WEEKLY
+   ========================================================= */
+
 function weekStart(i) {
-  const d = new Date();
+  const d =
+    new Date();
 
   d.setHours(
     0,
@@ -865,7 +1292,9 @@ function renderWeeks() {
 
   sel.innerHTML =
     Array.from(
-      { length: 8 },
+      {
+        length: 8
+      },
       (_, i) =>
         `<option value="${i}">
           Week ${i + 1}
@@ -877,46 +1306,70 @@ function renderWeeks() {
 
   const s =
     weekStart(
-      Number(state.week)
+      Number(
+        state.week
+      )
     );
 
   const dates = [];
 
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(s);
+  for (
+    let i = 0;
+    i < 7;
+    i++
+  ) {
+    const d =
+      new Date(s);
 
     d.setDate(
-      s.getDate() + i
+      s.getDate() +
+        i
     );
 
     dates.push(
-      d.toISOString().slice(0, 10)
+      d
+        .toISOString()
+        .slice(
+          0,
+          10
+        )
     );
   }
 
   const rows =
     dates.map(
-      d => [d, state.daily[d]]
+      d => [
+        d,
+        state.daily[d]
+      ]
     );
 
   const valid =
     rows
-      .map(x => x[1])
+      .map(
+        x => x[1]
+      )
       .filter(Boolean);
 
   const weights =
     valid
-      .map(x => +x.weight)
+      .map(
+        x => +x.weight
+      )
       .filter(Boolean);
 
   const cals =
     valid
-      .map(x => +x.calories)
+      .map(
+        x => +x.calories
+      )
       .filter(Boolean);
 
   const prots =
     valid
-      .map(x => +x.protein)
+      .map(
+        x => +x.protein
+      )
       .filter(Boolean);
 
   el("weekDays").textContent =
@@ -924,7 +1377,8 @@ function renderWeeks() {
 
   el("weekWeight").textContent =
     avg(weights) !== null
-      ? avg(weights).toFixed(1) + " kg"
+      ? avg(weights).toFixed(1) +
+        " kg"
       : "—";
 
   el("weekCalories").textContent =
@@ -934,52 +1388,63 @@ function renderWeeks() {
 
   el("weekProtein").textContent =
     avg(prots) !== null
-      ? avg(prots).toFixed(0) + " g"
+      ? avg(prots).toFixed(0) +
+        " g"
       : "—";
 
   el("weekTable").innerHTML =
-    `<table class="data-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Weight</th>
-          <th>Calories</th>
-          <th>Protein</th>
-          <th>Workout</th>
-        </tr>
-      </thead>
+    `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Weight</th>
+            <th>Calories</th>
+            <th>Protein</th>
+            <th>Workout</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        ${rows
-          .map(
-            ([d, x]) =>
-              `<tr>
-                <td>${d}</td>
-                <td>${x?.weight ?? "—"}</td>
-                <td>${x?.calories ?? "—"}</td>
-                <td>${x?.protein ?? "—"}</td>
-                <td>
-                  ${
-                    x
-                      ? [
-                          x.strength
-                            ? "Strength"
-                            : "",
-                          x.badminton
-                            ? "Badminton"
-                            : ""
-                        ]
-                          .filter(Boolean)
-                          .join(" + ") || "—"
-                      : "—"
-                  }
-                </td>
-              </tr>`
-          )
-          .join("")}
-      </tbody>
-    </table>`;
+        <tbody>
+          ${rows
+            .map(
+              ([d, x]) =>
+                `<tr>
+                  <td>${d}</td>
+                  <td>${x?.weight ?? "—"}</td>
+                  <td>${x?.calories ?? "—"}</td>
+                  <td>${x?.protein ?? "—"}</td>
+                  <td>
+                    ${
+                      x
+                        ? [
+                            x.strength
+                              ? "Strength"
+                              : "",
+                            x.badminton
+                              ? "Badminton"
+                              : ""
+                          ]
+                            .filter(Boolean)
+                            .join(
+                              " + "
+                            ) ||
+                          "—"
+                        : "—"
+                    }
+                  </td>
+                </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>
+    `;
 }
+
+
+/* =========================================================
+   RENDER EVERYTHING
+   ========================================================= */
 
 function renderAll() {
   renderDashboard();
@@ -989,19 +1454,28 @@ function renderAll() {
   renderWeeks();
 }
 
-/* =========================
-   AUTHENTICATION
-   ========================= */
 
-async function login(email, password) {
+/* =========================================================
+   AUTHENTICATION
+   ========================================================= */
+
+async function login(
+  email,
+  password
+) {
   el("authMessage").textContent =
     "Signing in…";
 
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signInWithPassword(
+      {
+        email,
+        password
+      }
+    );
 
   if (error) {
     el("authMessage").textContent =
@@ -1010,26 +1484,47 @@ async function login(email, password) {
     return;
   }
 
-  currentUser = data.user;
+  currentUser =
+    data.user;
 
   await enterApp();
 }
 
+
+/* =========================================================
+   ENTER APP
+   ========================================================= */
+
 async function enterApp() {
   /*
-    IMPORTANT:
-    Explicitly hide the login screen
-    and explicitly show the application.
+    Hide login screen.
   */
 
-  el("authScreen").classList.add("hidden");
-  el("authScreen").style.display = "none";
+  el("authScreen")
+    .classList.add(
+      "hidden"
+    );
 
-  el("appShell").classList.remove("hidden");
-  el("appShell").style.display = "";
+  el("authScreen")
+    .style.display =
+    "none";
+
+  /*
+    Show application.
+  */
+
+  el("appShell")
+    .classList.remove(
+      "hidden"
+    );
+
+  el("appShell")
+    .style.display =
+    "";
 
   el("userEmail").textContent =
-    currentUser?.email || "";
+    currentUser?.email ||
+    "";
 
   setToday();
 
@@ -1040,390 +1535,566 @@ async function enterApp() {
   await loadCloud();
 }
 
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
 async function logout() {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
 
   currentUser = null;
   cloudReady = false;
 
   /*
-    Explicitly hide the dashboard.
+    Hide dashboard.
   */
 
-  el("appShell").classList.add("hidden");
-  el("appShell").style.display = "none";
+  el("appShell")
+    .classList.add(
+      "hidden"
+    );
+
+  el("appShell")
+    .style.display =
+    "none";
 
   /*
-    Explicitly show the login screen.
+    Show login.
   */
 
-  el("authScreen").classList.remove("hidden");
-  el("authScreen").style.display = "";
+  el("authScreen")
+    .classList.remove(
+      "hidden"
+    );
 
-  el("loginPassword").value = "";
+  el("authScreen")
+    .style.display =
+    "";
+
+  el("loginPassword").value =
+    "";
 
   el("authMessage").textContent =
     "Signed out.";
 }
 
-/* =========================
+
+/* =========================================================
    EVENT LISTENERS
-   ========================= */
+   ========================================================= */
 
-el("loginForm").addEventListener(
-  "submit",
-  e => {
-    e.preventDefault();
+el("loginForm")
+  .addEventListener(
+    "submit",
+    e => {
+      e.preventDefault();
 
-    login(
-      el("loginEmail").value.trim(),
-      el("loginPassword").value
-    );
-  }
-);
+      login(
+        el("loginEmail")
+          .value
+          .trim(),
 
-el("logoutBtn").addEventListener(
-  "click",
-  logout
-);
+        el("loginPassword")
+          .value
+      );
+    }
+  );
+
+
+el("logoutBtn")
+  .addEventListener(
+    "click",
+    logout
+  );
+
 
 document
   .querySelectorAll(".tab")
   .forEach(b =>
     b.addEventListener(
       "click",
-      () => showTab(b.dataset.tab)
+      () =>
+        showTab(
+          b.dataset.tab
+        )
     )
   );
 
+
 document
-  .querySelectorAll("[data-jump]")
+  .querySelectorAll(
+    "[data-jump]"
+  )
   .forEach(b =>
     b.addEventListener(
       "click",
-      () => showTab(b.dataset.jump)
+      () =>
+        showTab(
+          b.dataset.jump
+        )
     )
   );
 
-el("dailyForm").addEventListener(
-  "submit",
-  async e => {
-    e.preventDefault();
 
-    const d =
-      el("dailyDate").value;
+/* =========================================================
+   DAILY FORM
+   ========================================================= */
 
-    const x = {
-      weight:
-        +el("dailyWeight").value || null,
+el("dailyForm")
+  .addEventListener(
+    "submit",
+    async e => {
+      e.preventDefault();
 
-      calories:
-        +el("dailyCalories").value || null,
+      const d =
+        el("dailyDate")
+          .value;
 
-      protein:
-        +el("dailyProtein").value || null,
+      const x = {
+        weight:
+          +el(
+            "dailyWeight"
+          ).value || null,
 
-      water:
-        +el("dailyWater").value || null,
+        calories:
+          +el(
+            "dailyCalories"
+          ).value || null,
 
-      sleep:
-        +el("dailySleep").value || null,
+        protein:
+          +el(
+            "dailyProtein"
+          ).value || null,
 
-      steps:
-        +el("dailySteps").value || null,
+        water:
+          +el(
+            "dailyWater"
+          ).value || null,
 
-      strength:
-        el("dailyStrength").checked,
+        sleep:
+          +el(
+            "dailySleep"
+          ).value || null,
 
-      badminton:
-        el("dailyBadminton").checked,
+        steps:
+          +el(
+            "dailySteps"
+          ).value || null,
 
-      notes:
-        el("dailyNotes").value
-    };
+        strength:
+          el(
+            "dailyStrength"
+          ).checked,
 
-    state.daily[d] = x;
+        badminton:
+          el(
+            "dailyBadminton"
+          ).checked,
 
-    cache();
+        notes:
+          el(
+            "dailyNotes"
+          ).value
+      };
 
-    renderAll();
+      state.daily[d] =
+        x;
 
-    await upsertDaily(d, x);
-  }
-);
+      cache();
 
-el("addFood").addEventListener(
-  "click",
-  () =>
-    addFood(
-      el("foodSelect").value,
-      el("foodQty").value
-    )
-);
+      renderAll();
 
-el("clearFood").addEventListener(
-  "click",
-  async () => {
-    if (
-      !confirm(
-        "Clear today's food?"
-      )
-    ) {
-      return;
+      await upsertDaily(
+        d,
+        x
+      );
     }
+  );
 
-    if (
-      currentUser &&
-      cloudReady
-    ) {
-      const { error } =
-        await supabase
-          .from("food_logs")
-          .delete()
-          .eq(
-            "user_id",
-            currentUser.id
-          )
-          .eq(
-            "log_date",
-            today()
+
+/* =========================================================
+   FOOD BUTTON
+   ========================================================= */
+
+el("addFood")
+  .addEventListener(
+    "click",
+    () =>
+      addFood(
+        el("foodSelect")
+          .value,
+
+        el("foodQty")
+          .value
+      )
+  );
+
+
+/* =========================================================
+   CLEAR FOOD
+   ========================================================= */
+
+el("clearFood")
+  .addEventListener(
+    "click",
+    async () => {
+      if (
+        !confirm(
+          "Clear today's food?"
+        )
+      ) {
+        return;
+      }
+
+      if (
+        currentUser &&
+        cloudReady
+      ) {
+        const {
+          error
+        } =
+          await supabaseClient
+            .from(
+              "food_logs"
+            )
+            .delete()
+            .eq(
+              "user_id",
+              currentUser.id
+            )
+            .eq(
+              "log_date",
+              today()
+            );
+
+        if (error) {
+          setSync(
+            "Could not clear food",
+            "error"
           );
 
-      if (error) {
-        setSync(
-          "Could not clear food",
-          "error"
+          return;
+        }
+      }
+
+      delete state.foods[
+        today()
+      ];
+
+      cache();
+
+      setSync(
+        "Today's food cleared",
+        "good"
+      );
+
+      renderAll();
+    }
+  );
+
+
+/* =========================================================
+   WORKOUT FORM
+   ========================================================= */
+
+el("workoutForm")
+  .addEventListener(
+    "submit",
+    async e => {
+      e.preventDefault();
+
+      const x = {
+        date:
+          el(
+            "workoutDate"
+          ).value,
+
+        split:
+          el(
+            "workoutSplit"
+          ).value,
+
+        exercise:
+          el(
+            "exerciseName"
+          ).value,
+
+        weight:
+          +el(
+            "exerciseWeight"
+          ).value || null,
+
+        sets:
+          +el(
+            "exerciseSets"
+          ).value || null,
+
+        reps:
+          +el(
+            "exerciseReps"
+          ).value || null,
+
+        badminton:
+          el(
+            "workoutBadminton"
+          ).checked,
+
+        completed:
+          el(
+            "workoutCompleted"
+          ).checked
+      };
+
+      if (!currentUser) {
+        state.workouts.push(
+          x
         );
+
+        cache();
+
+        renderAll();
 
         return;
       }
+
+      await insertWorkout(
+        x
+      );
     }
+  );
 
-    delete state.foods[today()];
 
-    cache();
+/* =========================================================
+   WEEK SELECT
+   ========================================================= */
 
-    setSync(
-      "Today's food cleared",
-      "good"
-    );
+el("weekSelect")
+  .addEventListener(
+    "change",
+    () => {
+      state.week =
+        +el(
+          "weekSelect"
+        ).value;
 
-    renderAll();
-  }
-);
-
-el("workoutForm").addEventListener(
-  "submit",
-  async e => {
-    e.preventDefault();
-
-    const x = {
-      date:
-        el("workoutDate").value,
-
-      split:
-        el("workoutSplit").value,
-
-      exercise:
-        el("exerciseName").value,
-
-      weight:
-        +el("exerciseWeight").value ||
-        null,
-
-      sets:
-        +el("exerciseSets").value ||
-        null,
-
-      reps:
-        +el("exerciseReps").value ||
-        null,
-
-      badminton:
-        el("workoutBadminton").checked,
-
-      completed:
-        el("workoutCompleted").checked
-    };
-
-    if (!currentUser) {
-      state.workouts.push(x);
       cache();
-      renderAll();
-      return;
+
+      renderWeeks();
     }
+  );
 
-    await insertWorkout(x);
-  }
-);
 
-el("weekSelect").addEventListener(
-  "change",
-  () => {
-    state.week =
-      +el("weekSelect").value;
+/* =========================================================
+   EXPORT
+   ========================================================= */
 
-    cache();
+el("exportBtn")
+  .addEventListener(
+    "click",
+    () => {
+      const blob =
+        new Blob(
+          [
+            JSON.stringify(
+              state,
+              null,
+              2
+            )
+          ],
+          {
+            type:
+              "application/json"
+          }
+        );
 
-    renderWeeks();
-  }
-);
+      const a =
+        document.createElement(
+          "a"
+        );
 
-el("exportBtn").addEventListener(
-  "click",
-  () => {
-    const blob =
-      new Blob(
-        [
-          JSON.stringify(
-            state,
-            null,
-            2
-          )
-        ],
-        {
-          type:
-            "application/json"
-        }
+      a.href =
+        URL.createObjectURL(
+          blob
+        );
+
+      a.download =
+        "fittrack-backup.json";
+
+      a.click();
+
+      URL.revokeObjectURL(
+        a.href
+      );
+    }
+  );
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+el("resetBtn")
+  .addEventListener(
+    "click",
+    async () => {
+      if (
+        !confirm(
+          "Reset all FitTrack data? This will delete your cloud data for this account too."
+        )
+      ) {
+        return;
+      }
+
+      if (
+        currentUser &&
+        cloudReady
+      ) {
+        const uid =
+          currentUser.id;
+
+        await Promise.all([
+          supabaseClient
+            .from(
+              "food_logs"
+            )
+            .delete()
+            .eq(
+              "user_id",
+              uid
+            ),
+
+          supabaseClient
+            .from(
+              "workout_logs"
+            )
+            .delete()
+            .eq(
+              "user_id",
+              uid
+            ),
+
+          supabaseClient
+            .from(
+              "daily_logs"
+            )
+            .delete()
+            .eq(
+              "user_id",
+              uid
+            ),
+
+          supabaseClient
+            .from(
+              "profiles"
+            )
+            .delete()
+            .eq(
+              "id",
+              uid
+            )
+        ]);
+      }
+
+      localStorage.removeItem(
+        KEY
       );
 
-    const a =
-      document.createElement("a");
+      state =
+        blankState();
 
-    a.href =
-      URL.createObjectURL(blob);
+      renderAll();
 
-    a.download =
-      "fittrack-backup.json";
-
-    a.click();
-
-    URL.revokeObjectURL(
-      a.href
-    );
-  }
-);
-
-el("resetBtn").addEventListener(
-  "click",
-  async () => {
-    if (
-      !confirm(
-        "Reset all FitTrack data? This will delete your cloud data for this account too."
-      )
-    ) {
-      return;
+      setSync(
+        "Data reset",
+        "good"
+      );
     }
+  );
 
-    if (
-      currentUser &&
-      cloudReady
-    ) {
-      const uid =
-        currentUser.id;
 
-      await Promise.all([
-        supabase
-          .from("food_logs")
-          .delete()
-          .eq("user_id", uid),
+/* =========================================================
+   SUPABASE SESSION LISTENER
+   ========================================================= */
 
-        supabase
-          .from("workout_logs")
-          .delete()
-          .eq("user_id", uid),
-
-        supabase
-          .from("daily_logs")
-          .delete()
-          .eq("user_id", uid),
-
-        supabase
-          .from("profiles")
-          .delete()
-          .eq("id", uid)
-      ]);
-    }
-
-    localStorage.removeItem(KEY);
-
-    state = blankState();
-
-    renderAll();
-
-    setSync(
-      "Data reset",
-      "good"
-    );
-  }
-);
-
-/* =========================
-   SESSION RESTORATION
-   ========================= */
-
-supabase.auth.onAuthStateChange(
-  async (_event, session) => {
+supabaseClient.auth.onAuthStateChange(
+  async (
+    _event,
+    session
+  ) => {
     if (session) {
       currentUser =
         session.user;
 
       await enterApp();
+
     } else {
       currentUser = null;
       cloudReady = false;
 
-      el("appShell").classList.add(
-        "hidden"
-      );
+      el("appShell")
+        .classList.add(
+          "hidden"
+        );
 
-      el("appShell").style.display =
+      el("appShell")
+        .style.display =
         "none";
 
-      el("authScreen").classList.remove(
-        "hidden"
-      );
+      el("authScreen")
+        .classList.remove(
+          "hidden"
+        );
 
-      el("authScreen").style.display =
+      el("authScreen")
+        .style.display =
         "";
     }
   }
 );
 
-/*
-  Check for an existing Supabase
-  session when the page loads.
-*/
+
+/* =========================================================
+   CHECK EXISTING SESSION
+   ========================================================= */
 
 (async () => {
-  const { data } =
-    await supabase.auth.getSession();
+  const {
+    data
+  } =
+    await supabaseClient.auth.getSession();
 
   if (data.session) {
     currentUser =
       data.session.user;
 
     await enterApp();
-  } else {
-    /*
-      No session = show login only.
-    */
 
+  } else {
     currentUser = null;
     cloudReady = false;
 
-    el("appShell").classList.add(
-      "hidden"
-    );
+    /*
+      No session:
+      show login screen only.
+    */
 
-    el("appShell").style.display =
+    el("appShell")
+      .classList.add(
+        "hidden"
+      );
+
+    el("appShell")
+      .style.display =
       "none";
 
-    el("authScreen").classList.remove(
-      "hidden"
-    );
+    el("authScreen")
+      .classList.remove(
+        "hidden"
+      );
 
-    el("authScreen").style.display =
+    el("authScreen")
+      .style.display =
       "";
   }
 })();
