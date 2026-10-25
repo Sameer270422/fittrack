@@ -7,159 +7,181 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div>
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-card">
       <div class="brand">FitTrack</div>
       <div class="subtitle">8-week fat-loss & muscle-preservation tracker</div>
+      <h1>Sign in</h1>
+      <p class="muted">Your FitTrack data is securely synced to your Supabase account.</p>
+      <form id="loginForm" class="form-grid single">
+        <label>Email<input type="email" id="loginEmail" autocomplete="email" required></label>
+        <label>Password<input type="password" id="loginPassword" autocomplete="current-password" required></label>
+        <button class="primary full" type="submit">Sign In</button>
+      </form>
+      <div id="authMessage" class="auth-message"></div>
     </div>
-    <div class="header-actions">
-      <button id="exportBtn" class="secondary">Export Backup</button>
-      <button id="resetBtn" class="danger">Reset</button>
-    </div>
-  </header>
+  </div>
 
-  <main class="container">
-    <section class="profile card">
+  <div id="appShell" class="hidden">
+    <header class="topbar">
       <div>
-        <h2>Your Goal</h2>
-        <p>Target: <strong>82–83 kg</strong> • Calories: <strong>1,800/day</strong> • Protein: <strong>140–160 g/day</strong></p>
+        <div class="brand">FitTrack</div>
+        <div class="subtitle">8-week fat-loss & muscle-preservation tracker</div>
       </div>
-      <div class="goal-progress"><div id="goalBar"></div></div>
-    </section>
-
-    <nav class="tabs">
-      <button class="tab active" data-tab="dashboard">Dashboard</button>
-      <button class="tab" data-tab="daily">Daily Log</button>
-      <button class="tab" data-tab="nutrition">Nutrition</button>
-      <button class="tab" data-tab="workout">Workout</button>
-      <button class="tab" data-tab="weekly">Weekly</button>
-    </nav>
-
-    <section id="dashboard" class="tab-panel active">
-      <div class="stats-grid">
-        <div class="stat card"><span>Current Weight</span><strong id="statWeight">88.0 kg</strong></div>
-        <div class="stat card"><span>Weight Lost</span><strong id="statLost">0.0 kg</strong></div>
-        <div class="stat card"><span>Avg Calories</span><strong id="statCal">—</strong></div>
-        <div class="stat card"><span>Avg Protein</span><strong id="statProtein">—</strong></div>
-        <div class="stat card"><span>Strength Days</span><strong id="statStrength">0</strong></div>
-        <div class="stat card"><span>Badminton</span><strong id="statBadminton">0</strong></div>
+      <div class="header-actions">
+        <span id="userEmail" class="user-email"></span>
+        <button id="exportBtn" class="secondary">Export Backup</button>
+        <button id="logoutBtn" class="secondary">Log Out</button>
+        <button id="resetBtn" class="danger">Reset</button>
       </div>
+    </header>
 
-      <div class="two-col">
-        <div class="card">
-          <div class="section-head"><h2>Weight Trend</h2><span id="daysLogged">0 days logged</span></div>
-          <canvas id="weightChart" height="230"></canvas>
+    <main class="container">
+      <section class="profile card">
+        <div>
+          <h2>Your Goal</h2>
+          <p>Target: <strong>82–83 kg</strong> • Calories: <strong>1,800/day</strong> • Protein: <strong>140–160 g/day</strong></p>
+          <p id="syncStatus" class="sync-status">Connecting to cloud…</p>
         </div>
-        <div class="card">
-          <h2>Weekly Summary</h2>
-          <div id="dashboardWeekly"></div>
-        </div>
-      </div>
+        <div class="goal-progress"><div id="goalBar"></div></div>
+      </section>
 
-      <div class="card">
-        <h2>Quick Actions</h2>
-        <div class="quick-actions">
-          <button class="primary" data-jump="daily">Log Today</button>
-          <button class="secondary" data-jump="nutrition">Add Food</button>
-          <button class="secondary" data-jump="workout">Log Workout</button>
-        </div>
-      </div>
-    </section>
+      <nav class="tabs">
+        <button class="tab active" data-tab="dashboard">Dashboard</button>
+        <button class="tab" data-tab="daily">Daily Log</button>
+        <button class="tab" data-tab="nutrition">Nutrition</button>
+        <button class="tab" data-tab="workout">Workout</button>
+        <button class="tab" data-tab="weekly">Weekly</button>
+      </nav>
 
-    <section id="daily" class="tab-panel">
-      <div class="card">
-        <h2>Daily Log</h2>
-        <form id="dailyForm" class="form-grid">
-          <label>Date<input type="date" id="dailyDate" required></label>
-          <label>Weight (kg)<input type="number" id="dailyWeight" step="0.1" min="0"></label>
-          <label>Calories<input type="number" id="dailyCalories" min="0"></label>
-          <label>Protein (g)<input type="number" id="dailyProtein" min="0"></label>
-          <label>Water (L)<input type="number" id="dailyWater" step="0.1" min="0"></label>
-          <label>Sleep (hours)<input type="number" id="dailySleep" step="0.1" min="0"></label>
-          <label>Steps<input type="number" id="dailySteps" min="0"></label>
-          <label>Notes<textarea id="dailyNotes" rows="3"></textarea></label>
-          <div class="checks">
-            <label><input type="checkbox" id="dailyStrength"> Strength workout</label>
-            <label><input type="checkbox" id="dailyBadminton"> Badminton</label>
+      <section id="dashboard" class="tab-panel active">
+        <div class="stats-grid">
+          <div class="stat card"><span>Current Weight</span><strong id="statWeight">88.0 kg</strong></div>
+          <div class="stat card"><span>Weight Lost</span><strong id="statLost">0.0 kg</strong></div>
+          <div class="stat card"><span>Avg Calories</span><strong id="statCal">—</strong></div>
+          <div class="stat card"><span>Avg Protein</span><strong id="statProtein">—</strong></div>
+          <div class="stat card"><span>Strength Days</span><strong id="statStrength">0</strong></div>
+          <div class="stat card"><span>Badminton</span><strong id="statBadminton">0</strong></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="section-head"><h2>Weight Trend</h2><span id="daysLogged">0 days logged</span></div>
+            <canvas id="weightChart" height="230"></canvas>
           </div>
-          <button class="primary full" type="submit">Save Daily Log</button>
-        </form>
-      </div>
-      <div class="card">
-        <h2>Recent Days</h2>
-        <div id="dailyTable" class="table-wrap"></div>
-      </div>
-    </section>
-
-    <section id="nutrition" class="tab-panel">
-      <div class="two-col">
-        <div class="card">
-          <h2>Today's Nutrition</h2>
-          <div class="nutrition-totals">
-            <div><span>Calories</span><strong id="foodCal">0</strong> / 1800</div>
-            <div><span>Protein</span><strong id="foodProtein">0</strong> / 140–160 g</div>
+          <div class="card">
+            <h2>Weekly Summary</h2>
+            <div id="dashboardWeekly"></div>
           </div>
-          <div id="foodList"></div>
-          <button id="clearFood" class="danger full">Clear Today's Food</button>
+        </div>
+
+        <div class="card">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions">
+            <button class="primary" data-jump="daily">Log Today</button>
+            <button class="secondary" data-jump="nutrition">Add Food</button>
+            <button class="secondary" data-jump="workout">Log Workout</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="daily" class="tab-panel">
+        <div class="card">
+          <h2>Daily Log</h2>
+          <form id="dailyForm" class="form-grid">
+            <label>Date<input type="date" id="dailyDate" required></label>
+            <label>Weight (kg)<input type="number" id="dailyWeight" step="0.1" min="0"></label>
+            <label>Calories<input type="number" id="dailyCalories" min="0"></label>
+            <label>Protein (g)<input type="number" id="dailyProtein" min="0"></label>
+            <label>Water (L)<input type="number" id="dailyWater" step="0.1" min="0"></label>
+            <label>Sleep (hours)<input type="number" id="dailySleep" step="0.1" min="0"></label>
+            <label>Steps<input type="number" id="dailySteps" min="0"></label>
+            <label>Notes<textarea id="dailyNotes" rows="3"></textarea></label>
+            <div class="checks">
+              <label><input type="checkbox" id="dailyStrength"> Strength workout</label>
+              <label><input type="checkbox" id="dailyBadminton"> Badminton</label>
+            </div>
+            <button class="primary full" type="submit">Save Daily Log</button>
+          </form>
         </div>
         <div class="card">
-          <h2>Add Food</h2>
-          <div class="form-grid">
-            <label>Food<select id="foodSelect"></select></label>
-            <label>Quantity / servings<input type="number" id="foodQty" value="1" min="0.1" step="0.1"></label>
-            <button id="addFood" class="primary full">Add Food</button>
+          <h2>Recent Days</h2>
+          <div id="dailyTable" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <section id="nutrition" class="tab-panel">
+        <div class="two-col">
+          <div class="card">
+            <h2>Today's Nutrition</h2>
+            <div class="nutrition-totals">
+              <div><span>Calories</span><strong id="foodCal">0</strong> / 1800</div>
+              <div><span>Protein</span><strong id="foodProtein">0</strong> / 140–160 g</div>
+            </div>
+            <div id="foodList"></div>
+            <button id="clearFood" class="danger full">Clear Today's Food</button>
           </div>
-          <p class="hint">Values are editable in <code>js/app.js</code> so you can match your actual brands and labels.</p>
-          <div id="foodCards" class="food-cards"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="workout" class="tab-panel">
-      <div class="card">
-        <h2>Workout Log</h2>
-        <form id="workoutForm" class="form-grid">
-          <label>Date<input type="date" id="workoutDate" required></label>
-          <label>Split
-            <select id="workoutSplit">
-              <option>Push</option><option>Pull</option><option>Legs</option><option>Push + Light</option><option>Pull + Core</option><option>Rest</option>
-            </select>
-          </label>
-          <label>Exercise<input id="exerciseName" placeholder="e.g. Bench Press"></label>
-          <label>Weight (kg)<input type="number" id="exerciseWeight" step="0.5" min="0"></label>
-          <label>Sets<input type="number" id="exerciseSets" min="0"></label>
-          <label>Reps<input type="number" id="exerciseReps" min="0"></label>
-          <div class="checks">
-            <label><input type="checkbox" id="workoutBadminton"> Badminton</label>
-            <label><input type="checkbox" id="workoutCompleted"> Workout completed</label>
+          <div class="card">
+            <h2>Add Food</h2>
+            <div class="form-grid">
+              <label>Food<select id="foodSelect"></select></label>
+              <label>Quantity / servings<input type="number" id="foodQty" value="1" min="0.1" step="0.1"></label>
+              <button id="addFood" class="primary full">Add Food</button>
+            </div>
+            <p class="hint">Values are approximate defaults. Edit them in <code>js/app.js</code> if your package labels differ.</p>
+            <div id="foodCards" class="food-cards"></div>
           </div>
-          <button class="primary full" type="submit">Save Workout</button>
-        </form>
-      </div>
-      <div class="card">
-        <h2>Workout History</h2>
-        <div id="workoutTable" class="table-wrap"></div>
-      </div>
-    </section>
-
-    <section id="weekly" class="tab-panel">
-      <div class="card">
-        <div class="section-head">
-          <h2>8-Week Overview</h2>
-          <select id="weekSelect"></select>
         </div>
-        <div class="stats-grid compact">
-          <div class="stat card"><span>Days Logged</span><strong id="weekDays">0</strong></div>
-          <div class="stat card"><span>Avg Weight</span><strong id="weekWeight">—</strong></div>
-          <div class="stat card"><span>Avg Calories</span><strong id="weekCalories">—</strong></div>
-          <div class="stat card"><span>Avg Protein</span><strong id="weekProtein">—</strong></div>
-        </div>
-        <div id="weekTable" class="table-wrap"></div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <footer>FitTrack stores your data in this browser. Export a backup before moving devices or browsers.</footer>
+      <section id="workout" class="tab-panel">
+        <div class="card">
+          <h2>Workout Log</h2>
+          <form id="workoutForm" class="form-grid">
+            <label>Date<input type="date" id="workoutDate" required></label>
+            <label>Split
+              <select id="workoutSplit">
+                <option>Push</option><option>Pull</option><option>Legs</option><option>Push + Light</option><option>Pull + Core</option><option>Rest</option>
+              </select>
+            </label>
+            <label>Exercise<input id="exerciseName" placeholder="e.g. Bench Press"></label>
+            <label>Weight (kg)<input type="number" id="exerciseWeight" step="0.5" min="0"></label>
+            <label>Sets<input type="number" id="exerciseSets" min="0"></label>
+            <label>Reps<input type="number" id="exerciseReps" min="0"></label>
+            <div class="checks">
+              <label><input type="checkbox" id="workoutBadminton"> Badminton</label>
+              <label><input type="checkbox" id="workoutCompleted"> Workout completed</label>
+            </div>
+            <button class="primary full" type="submit">Save Workout</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Workout History</h2>
+          <div id="workoutTable" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <section id="weekly" class="tab-panel">
+        <div class="card">
+          <div class="section-head">
+            <h2>8-Week Overview</h2>
+            <select id="weekSelect"></select>
+          </div>
+          <div class="stats-grid compact">
+            <div class="stat card"><span>Days Logged</span><strong id="weekDays">0</strong></div>
+            <div class="stat card"><span>Avg Weight</span><strong id="weekWeight">—</strong></div>
+            <div class="stat card"><span>Avg Calories</span><strong id="weekCalories">—</strong></div>
+            <div class="stat card"><span>Avg Protein</span><strong id="weekProtein">—</strong></div>
+          </div>
+          <div id="weekTable" class="table-wrap"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>FitTrack uses Supabase for cloud sync. Export a backup before making major changes.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
